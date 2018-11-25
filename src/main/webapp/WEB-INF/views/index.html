@@ -1,0 +1,122 @@
+<#include "head.html">
+<ul class="layui-nav layui-nav-tree site-demo-nav">
+  
+  <li class="layui-nav-item layui-nav-itemed">
+    <a class="javascript:;" href="javascript:;">任务管理</a>
+    <dl class="layui-nav-child">
+      <dd class="layui-this">
+        <a href="${rc.contextPath}/index.html">WordCount</a>
+      </dd>
+	  <dd class="">
+        <a href="${rc.contextPath}/list.html">任务列表</a>
+      </dd>
+    </dl>
+  </li>
+  
+  <li class="layui-nav-item layui-nav-itemed">
+    <a class="javascript:;" href="javascript:;">用户管理</a>
+    <dl class="layui-nav-child">
+      <dd class="">
+        <a href="#">用户列表</a>
+      </dd>
+      <dd class="">
+        <a href="#">添加用户</a>
+      </dd>
+    </dl>
+  </li>
+    
+  <li class="layui-nav-item" style="height: 30px; text-align: center"></li>
+</ul>
+
+    </div>
+  </div>
+    <div class="layui-body layui-tab-content site-demo site-demo-body">
+    
+    
+      <div class="layui-tab-item layui-show">
+        <div class="layui-main">
+          <div id="LAY_preview">
+          
+<blockquote class="layui-elem-quote layui-text">
+  请先将要计算的文件上传到HDFS的根目录
+</blockquote>
+              
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>WordCount</legend>
+</fieldset>
+ 
+<form class="layui-form" action="">
+  <div class="layui-form-item">
+    <label class="layui-form-label">排序规则</label>
+    <div class="layui-input-block">
+      <input type="radio" name="sort" value="desc" title="倒序" checked>
+      <input type="radio" name="sort" value="asc" title="正序">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">记录数量</label>
+    <div class="layui-input-block">
+      <input type="number" name="count" placeholder="将前多少个word记录数据库" min="1" max="100" class="layui-input">
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn" lay-submit lay-filter="demo1">立即提交</button>
+      <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+  </div>
+</form>
+ 
+          </div>
+          
+        </div>
+        
+        
+    </div>
+  </div>
+  <div class="layui-footer footer footer-demo">
+  <div class="layui-main">
+    <p>&copy; 2018 <a href="/">HPE</a> MIT license</p>
+  </div>
+</div>
+<script src="${rc.contextPath}/static/layui/layui.js" charset="utf-8"></script>
+</div>
+<script>
+layui.use(['element', 'form'], function(){
+  var $ = layui.jquery
+  ,element = layui.element
+  ,form = layui.form
+  ,layer = layui.layer;
+
+  
+  //监听提交
+  form.on('submit(demo1)', function(data){
+	  console.log(data.field);
+	  var ii = layer.load(2, {shade:[0.1,'#fff']});
+	  $.ajax({
+		type : "POST",
+		url : baseUrl+"/task/submit",
+		data : {act:"add", sort:data.field.sort, count:data.field.count},
+		dataType : 'json',
+		success : function(data) {
+			layer.close(ii);
+			if(data.code == 0){
+				window.location.href=baseUrl+'/result.html?id='+data.id;
+			}else{
+				layer.alert(data.msg, {icon: 0});
+			}
+		},
+		error:function(data){
+			layer.msg('服务器错误', {icon: 2});
+			return false;
+		}
+	});
+	  return false;
+  });
+
+  
+});
+</script>
+</body>
+</html>

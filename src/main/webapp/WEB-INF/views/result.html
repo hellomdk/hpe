@@ -1,0 +1,193 @@
+<#include "head.html">      
+<ul class="layui-nav layui-nav-tree site-demo-nav">
+  
+  <li class="layui-nav-item layui-nav-itemed">
+    <a class="javascript:;" href="javascript:;">任务管理</a>
+    <dl class="layui-nav-child">
+      <dd class="">
+        <a href="${rc.contextPath}/index.html">WordCount</a>
+      </dd>
+	  <dd class="">
+        <a href="${rc.contextPath}/list.html">任务列表</a>
+      </dd>
+    </dl>
+  </li>
+  
+  <li class="layui-nav-item layui-nav-itemed">
+    <a class="javascript:;" href="javascript:;">用户管理</a>
+    <dl class="layui-nav-child">
+      <dd class="">
+        <a href="#">用户列表</a>
+      </dd>
+      <dd class="">
+        <a href="#">添加用户</a>
+      </dd>
+    </dl>
+  </li>
+    
+  <li class="layui-nav-item" style="height: 30px; text-align: center"></li>
+</ul>
+
+    </div>
+  </div>
+    <div class="layui-body layui-tab-content site-demo site-demo-body">
+    
+    
+      <div class="layui-tab-item layui-show">
+        <div class="layui-main">
+          <div id="LAY_preview">
+              
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>任务详情</legend>
+</fieldset>
+
+<div style="padding: 20px; background-color: #F2F2F2;">
+  <div class="layui-row layui-col-space15">
+<table class="layui-table">
+    <tbody id="resultData">
+		<tr><td>任务ID</td><td id="taskId"></td></tr>
+		<tr><td>任务名称</td><td id="taskName"></td></tr>
+		<tr><td>任务创建时间</td><td id="createTime"></td></tr>
+		<tr><td>任务执行时间</td><td id="startTime"></td></tr>
+		<tr><td>任务结束时间</td><td id="finishTime"></td></tr>
+		<tr><td>任务类型</td><td id="taskType"></td></tr>
+		<tr><td>任务状态</td><td id="taskStatus"></td></tr>
+		<tr><td>任务数据</td><td id="taskParam"></td></tr>
+		<tr><td>任务操作</td><td><a href="#" id="retryTask" class="layui-btn layui-btn-warm">重试任务</a>&nbsp;<a href="#" id="deleteTask" class="layui-btn layui-btn-danger">删除任务</a></td></td></tr>
+    </tbody>
+  </table>
+  </div>
+</div> 
+<div style="padding: 20px; background-color: #F2F2F2;">
+  <div class="layui-row layui-col-space15">
+      <div class="layui-card">
+        <div class="layui-card-header">运行结果</div>
+        <div class="layui-card-body">
+<table class="layui-table">
+    <thead>
+      <tr>
+        <th>单词</th>
+        <th>出现次数</th>
+      </tr> 
+    </thead>
+    <tbody id="resultData1">
+
+    </tbody>
+  </table>
+        </div>
+      </div>
+  </div>
+  <div class="layui-row layui-col-space15">
+      <div class="layui-card">
+        <div class="layui-card-header">运行日志</div>
+        <div class="layui-card-body">
+          无
+        </div>
+      </div>
+  </div>
+</div> 
+
+          </div>
+          
+        </div>
+        
+        
+    </div>
+  </div>
+  <div class="layui-footer footer footer-demo">
+  <div class="layui-main">
+    <p>&copy; 2018 <a href="/">HPE</a> MIT license</p>
+  </div>
+</div>
+<script src="${rc.contextPath}/static/layui/layui.js" charset="utf-8"></script>
+</div>
+<script>
+var url = window.document.location.href.toString();
+var taskId = url.split("id=")[1].split("&")[0];
+
+layui.use(['element', 'form'], function(){
+  var $ = layui.jquery
+  ,element = layui.element
+  ,layer = layui.layer;
+  
+  var ii = layer.load(2, {shade:[0.1,'#fff']});
+  $.ajax({
+	type : "post",
+	url : baseUrl+"/rest/selectRest",
+	data : {id:taskId},
+	dataType : 'json',
+	success : function(data) {
+		layer.close(ii);
+		if(data.code == 0){
+			$("#taskId").html(data.info.taskId);
+			$("#taskName").html(data.info.taskName);
+			$("#createTime").html(data.info.createTime);
+			$("#startTime").html(data.info.startTime);
+			$("#finishTime").html(data.info.finishTime);
+			$("#taskType").html(data.info.taskType);
+			$("#taskStatus").html(data.info.taskStatus);
+			$("#taskParam").html(data.info.taskParam);
+			//var obj = data.result.parseJSON();
+			var obj = JSON.parse(data.result);
+			$.each(obj,function(index,element){
+				$("#resultData1").append("<tr><td>"+index+"</td><td>"+element+"</td></tr>");
+			})
+/* 			obj.each(function(index,element){
+				$("#resultData").append("<tr><td>"+index+"</td><td>"+element+"</td></tr>");
+			}) */
+		}else{
+			layer.alert(data.msg, {icon: 0});
+		}
+	},
+	error:function(data){
+		layer.msg('服务器错误', {icon: 2});
+		return false;
+	}
+  });
+  $("#retryTask").click(function(){
+	  var ii = layer.load(2, {shade:[0.1,'#fff']});
+	  $.ajax({
+		type : "POST",
+		url : baseUrl+"/task/retry",
+		data : {id:taskId},
+		dataType : 'json',
+		success : function(data) {
+			layer.close(ii);
+			if(data.code == 0){
+				window.location.reload();
+			}else{
+				layer.alert(data.msg, {icon: 0});
+			}
+		},
+		error:function(data){
+			layer.msg('服务器错误', {icon: 2});
+			return false;
+		}
+	});
+  });
+  $("#deleteTask").click(function(){
+	  var ii = layer.load(2, {shade:[0.1,'#fff']});
+	  $.ajax({
+		type : "POST",
+		url : baseUrl+"/task/delete",
+		data : {id:taskId},
+		dataType : 'json',
+		success : function(data) {
+			layer.close(ii);
+			if(data.code == 0){
+				window.location.reload();
+			}else{
+				layer.alert(data.msg, {icon: 0});
+			}
+		},
+		error:function(data){
+			layer.msg('服务器错误', {icon: 2});
+			return false;
+		}
+	});
+  })
+  
+});
+</script>
+</body>
+</html>

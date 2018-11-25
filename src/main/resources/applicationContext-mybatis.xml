@@ -1,0 +1,50 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+
+	<!-- mapper配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 指定数据库连接池 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 加载mybatis的全局配置文件 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<property name="typeAliasesPackage" value="com.hpe.pojo"></property>
+		<!--<property name="mapperLocations" value="classpath:mapper/*.xml"></property>-->
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageInterceptor">
+					<property name="properties">
+						<value>
+							helperDialect=mysql
+							offsetAsPageNum=true
+							<!-- 防止出现小于第一页，大于最后一页的异常情况出现。 -->
+							reasonable=true
+						</value>
+					</property>
+				</bean>
+				<bean class="com.github.abel533.mapperhelper.MapperInterceptor">
+					<property name="properties">
+						<value>
+							<!-- 主键自增回写方法,默认值MYSQL -->
+							IDENTITY=MYSQL
+							mappers=com.github.abel533.mapper.Mapper
+						</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+
+	<!-- 配置mapper的bean，使用包扫描的方式 批量导入Mapper。这样mybatis所有的配置都交给spring来管理 扫描后 引用时可以直接使用类名，注意首字母小写 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 指定扫描包的全路径。如果有多个，用英文的逗号分开 -->
+		<property name="basePackage" value="com.hpe.mapper"></property>
+	</bean>
+
+</beans>
